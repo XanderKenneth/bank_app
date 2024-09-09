@@ -1,3 +1,4 @@
+import e from "express";
 import { executeQuery } from "../config/database.js";
 
 
@@ -10,6 +11,18 @@ export const createUser = async (firstname, lastname, email, password) => {
         return result;
     }catch(error){
         console.error("error inserting into users!! ",error)
+    }
+}
+
+export const getUserByEmail = async(email) =>{
+    try {
+        const query = `SELECT * FROM users WHERE email = $1;`
+
+        const res = await executeQuery(query, [email]);
+
+        return res
+    } catch (error) {
+        
     }
 }
 
@@ -48,3 +61,15 @@ export const deleteUserservices = async (id) => {
         console.log('There was an error in deleting the user',error);
     }
 }
+
+// export const deleteUser = async () => {
+//     const query = `
+//     DELETE FROM users WHERE id = $1
+//     `;
+//     try{
+//         await executeQuery(query)
+//         console.log(`This user has been sucessfully deleted`);
+//     }catch(error){
+//         console.log(`There was an error in deleting this user`,error);
+//     }
+// }
