@@ -1,5 +1,6 @@
-import e from "express";
+// import express from "express";
 import { executeQuery } from "../config/database.js";
+
 
 
 export const createUser = async (firstname, lastname, email, password) => {
@@ -20,6 +21,7 @@ export const getUserByEmail = async(email) =>{
 
         const res = await executeQuery(query, [email]);
 
+    
         return res
     } catch (error) {
         
@@ -33,6 +35,8 @@ export const getallusersservices = async () => {
         `
 
         const result = await executeQuery(query);
+
+
         return result;
     }catch(error){
         console.log(`There was an error getting all users`,error);

@@ -1,7 +1,10 @@
 import { createUser} from "./user.services.js";
 import { getallusersservices, getalluseridservices, getUserByEmail, deleteUserservices } from "./user.services.js";
-import { signupSchema } from "./user.validator.js";
-import { hashpassword } from "./utils/bcrypt.js";
+import { signupSchema ,signinSchema} from "./user.validator.js";
+import { comparePassword, hashpassword } from "../utils/bcrypt.js";
+import {sanitize, sanitizeUserArray } from "../utils/sanitizeUsers.js";
+import { generateToken } from "../utils/jwt.js";
+
 
 export const signup = async  (req,res) => {
 
@@ -18,7 +21,7 @@ export const signup = async  (req,res) => {
 
     const hashedpassword = await hashpassword(password)
 
-    console.log(hashedpassword);
+    // console.log(hashedpassword);
 
     const userExists =  await getUserByEmail(email);
 
@@ -26,21 +29,31 @@ export const signup = async  (req,res) => {
         message: `User with email ${email} already exists`
     })
 
-    const user = await createUser(firstname,lastname, email, hashedpassword);
+    const [userdetails] = await createUser(firstname,lastname, email, hashedpassword);
 
     return res.status(201).json({
         "message":"user has been created ",
-        "data" : user
+        "data" : sanitize(userdetails)
     })
 }
 
 export const getallusers = async (req,res) => {
+
+    const currUser = req.user;
+
+    if (currUser.email == "Kennethumunna123@gmail.com") return res.status(401).json({
+        "message": "i hate any Kenneth!!"
+    })
     
     const allusers = await getallusersservices();
 
+    
+
+    const sanitized = sanitizeUserArray(allusers);
+
     return res.status(200).json({
         "message" :"These are all the users",
-        "data" : allusers
+        "data" : sanitized
     })
 }
 
@@ -66,4 +79,38 @@ export const deleteduser = async (req,res) => {
         "message":"user has been deleted ",
         
     })
+}
+
+
+export const signin = async (req,res) => {
+
+    const { error, value} = signinSchema.validate(req.body)
+
+    if (error) return res.status(400).json({
+        "message" : error.details[0].message
+    })
+
+    const {email,password} = value;
+
+    const [user] = await getUserByEmail(email);
+
+    if (!user) return res.status(404).json({
+        message: "No user with such email"
+    })
+
+    const isMatch = await comparePassword(password, user.password)
+
+    if (!isMatch) return res.status(404).json({
+        message : "Invalid credentials"
+    })
+
+    const accessToken = generateToken(sanitize(user))
+
+    return res.status(200).json({
+        message : "User loggedin succesfully",
+        accessToken : accessToken
+    })           
+
+
+
 }
