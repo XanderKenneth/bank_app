@@ -1,11 +1,26 @@
-// import { executeQuery } from "../config/database.js";
+import { executeQuery } from "../config/database.js";
 
-// export const createAccount = async (users_id, account_number) =>{
-//     try{
-//     const query = `INSERT INTO accounts (users_id, account_number) VALUES ($1, $2) RETURNING *`
+export const createAccount = async (userId, accountNumber, currency, type) =>{
+    try{
+    const query = `INSERT INTO accounts (userId, account_number, currency, type) VALUES ($1, $2, $3, $4) RETURNING *
+    `
 
-//     const results = await executeQuery(query, [users_id,account_number])
-//     }catch{
-//         console.log("Error creating account");
-//     }
-// }
+    const results = await executeQuery(query, [userId,accountNumber, currency, type])
+
+    return results
+    }catch(error){
+        throw new Error(error)
+    }
+}
+
+
+export const getAccountByNumber = async(accountNumber) =>{
+    try {
+        const query = `SELECT * FROM accounts where account_number = $1`
+        const results = await executeQuery(query, [accountNumber])
+
+        return results
+    } catch (error) {
+        throw new Error(error);
+    }
+}

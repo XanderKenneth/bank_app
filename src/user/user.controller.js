@@ -1,5 +1,5 @@
 import { createUser} from "./user.services.js";
-import { getallusersservices, getalluseridservices, getUserByEmail, deleteUserservices } from "./user.services.js";
+import { getallusersservices, getalluseridservices, getUserByEmail, deleteUserservices, getUserByPhoneNumber } from "./user.services.js";
 import { signupSchema ,signinSchema} from "./user.validator.js";
 import { comparePassword, hashpassword } from "../utils/bcrypt.js";
 import {sanitize, sanitizeUserArray } from "../utils/sanitizeUsers.js";
@@ -17,7 +17,7 @@ export const signup = async  (req,res) => {
     })
 
 
-    const { firstname,lastname,email,password} = value;
+    const { firstname,lastname,email,password, phonenumber} = value;
 
     const hashedpassword = await hashpassword(password)
 
@@ -25,11 +25,13 @@ export const signup = async  (req,res) => {
 
     const userExists =  await getUserByEmail(email);
 
-    if (userExists.length > 0) return res.status(409).json({
-        message: `User with email ${email} already exists`
+    const userNumExists = await getUserByPhoneNumber(phonenumber)
+
+    if (userExists.length > 0 || userNumExists.length > 0) return res.status(409).json({
+        message: `User with this email or phonenumber already exists`
     })
 
-    const [userdetails] = await createUser(firstname,lastname, email, hashedpassword);
+    const [userdetails] = await createUser(firstname,lastname, email, hashedpassword, phonenumber);
 
     return res.status(201).json({
         "message":"user has been created ",

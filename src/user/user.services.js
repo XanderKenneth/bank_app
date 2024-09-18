@@ -3,12 +3,12 @@ import { executeQuery } from "../config/database.js";
 
 
 
-export const createUser = async (firstname, lastname, email, password) => {
+export const createUser = async (firstname, lastname, email, password, phonenumber) => {
     try{
-        const query = `INSERT INTO users (firstname,lastname , email, password) VALUES ($1 , $2 ,$3 ,$4) RETURNING *;
+        const query = `INSERT INTO users (firstname,lastname , email, password, phonenumber) VALUES ($1 , $2 ,$3 ,$4, $5) RETURNING *;
         
         `
-        const result = await executeQuery(query, [firstname, lastname, email, password]);
+        const result = await executeQuery(query, [firstname, lastname, email, password, phonenumber]);
         return result;
     }catch(error){
         console.error("error inserting into users!! ",error)
@@ -24,7 +24,20 @@ export const getUserByEmail = async(email) =>{
     
         return res
     } catch (error) {
+        throw new Error(error)
+    }
+}
+
+export const getUserByPhoneNumber = async(phonenumber) =>{
+    try {
+        const query = `SELECT * FROM users WHERE phonenumber = $1;`
+
+        const res = await executeQuery(query, [phonenumber]);
+    
+        return res
         
+    } catch (error) {
+        throw new Error(error)
     }
 }
 
